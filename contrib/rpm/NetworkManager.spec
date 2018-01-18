@@ -89,17 +89,18 @@
 Name: NetworkManager
 Summary: Network connection manager and user applications
 Epoch: %{epoch_version}
-Version: %{rpm_version}
-Release: %{release_version}%{?snap}%{?dist}
+Version: 1.2.3.4
+Release: 0
 Group: System Environment/Base
 License: GPLv2+
 URL: http://www.gnome.org/projects/NetworkManager/
 
 #Source: https://download.gnome.org/sources/NetworkManager/%{real_version_major}/%{name}-%{real_version}.tar.xz
-Source: __SOURCE1__
+Source: %{name}-%{version}.tar.xz
 Source1: NetworkManager.conf
 Source2: 00-server.conf
 Source3: 20-connectivity-fedora.conf
+Source4: %{name}-rpmlintrc
 
 #Patch1: 0001-some.patch
 
@@ -136,15 +137,15 @@ BuildRequires: automake autoconf intltool libtool
 BuildRequires: ppp-devel >= 2.4.5
 %endif
 BuildRequires: pkgconfig(nss) >= 3.11.7
-BuildRequires: dhclient
+BuildRequires: dhcp-client
 BuildRequires: readline-devel
-BuildRequires: audit-libs-devel
+BuildRequires: pkgconfig(audit)
 %if %{with regen_docs}
 BuildRequires: gtk-doc
 %endif
 BuildRequires: pkgconfig(libudev)
 BuildRequires: pkgconfig(uuid)
-BuildRequires: vala-tools
+BuildRequires: vala
 BuildRequires: iptables
 BuildRequires: libxslt
 %if %{with bluetooth}
@@ -157,7 +158,7 @@ BuildRequires: libpsl-devel >= 0.1
 BuildRequires: libcurl-devel
 BuildRequires: libndp-devel >= 1.0
 %if 0%{?with_modem_manager_1}
-BuildRequires: ModemManager-glib-devel >= 1.0
+BuildRequires: ModemManager-devel >= 1.0
 %endif
 %if %{with nmtui}
 BuildRequires: newt-devel
@@ -210,7 +211,6 @@ This package contains NetworkManager support for Bluetooth devices.
 %package team
 Summary: Team device plugin for NetworkManager
 Group: System Environment/Base
-BuildRequires: teamd-devel
 Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Obsoletes: NetworkManager < %{obsoletes_device_plugins}
 # Team was split from main NM binary between 0.9.10 and 1.0
@@ -384,7 +384,7 @@ by nm-connection-editor and nm-applet in a non-graphical environment.
 %endif
 
 %prep
-%setup -q -n NetworkManager-%{real_version}
+%setup -q
 
 #%patch1 -p1
 
@@ -396,10 +396,6 @@ autoreconf --install --force
 intltoolize --automake --copy --force
 %configure \
 	--disable-static \
-	--with-dhclient=yes \
-	--with-dhcpcd=no \
-	--with-dhcpcanon=no \
-	--with-config-dhcp-default=dhclient \
 	--with-crypto=nss \
 %if %{with test}
 	--enable-more-warnings=error \
@@ -480,15 +476,11 @@ intltoolize --automake --copy --force
 	--with-tests=no \
 %endif
 	--with-valgrind=no \
-	--enable-ifcfg-rh=yes \
 %if %{with ppp}
 	--with-pppd-plugin-dir=%{_libdir}/pppd/%{ppp_version} \
 	--enable-ppp=yes \
 %endif
 	--with-dist-version=%{version}-%{release} \
-	--with-config-plugins-default='ifcfg-rh,ibft' \
-	--with-config-dns-rc-manager-default=symlink \
-	--with-config-logging-backend-default=journal \
 	--enable-json-validation \
 %if %{with libnm_glib}
 	--with-libnm-glib
@@ -521,8 +513,8 @@ rm -f %{buildroot}%{_libdir}/NetworkManager/*.la
 find %{buildroot}%{_datadir}/gtk-doc -exec touch --reference configure.ac '{}' \+
 
 %if 0%{?__debug_package}
-mkdir -p %{buildroot}%{_prefix}/src/debug/NetworkManager-%{real_version}
-cp valgrind.suppressions %{buildroot}%{_prefix}/src/debug/NetworkManager-%{real_version}
+#mkdir -p %{buildroot}%{_prefix}/src/debug/NetworkManager-%{real_version}
+#cp valgrind.suppressions %{buildroot}%{_prefix}/src/debug/NetworkManager-%{real_version}
 %endif
 
 
@@ -586,7 +578,6 @@ fi
 %dir %{_sysconfdir}/%{name}/dispatcher.d/no-wait.d
 %dir %{_sysconfdir}/%{name}/dnsmasq.d
 %dir %{_sysconfdir}/%{name}/dnsmasq-shared.d
-%config(noreplace) %{_sysconfdir}/%{name}/NetworkManager.conf
 %{_bindir}/nm-online
 %{_libexecdir}/nm-dhcp-helper
 %{_libexecdir}/nm-dispatcher
@@ -615,8 +606,7 @@ fi
 %{systemd_dir}/NetworkManager.service
 %{systemd_dir}/NetworkManager-wait-online.service
 %{systemd_dir}/NetworkManager-dispatcher.service
-%dir %{_datadir}/doc/NetworkManager/examples
-%{_datadir}/doc/NetworkManager/examples/server.conf
+%{_datadir}/doc/NetworkManager
 %doc NEWS AUTHORS README CONTRIBUTING TODO
 %license COPYING
 
@@ -651,7 +641,7 @@ fi
 %if %{with ovs}
 %files ovs
 %{_libdir}/%{name}/libnm-device-plugin-ovs.so
-%{systemd_dir}/NetworkManager.service.d/NetworkManager-ovs.conf
+%{systemd_dir}/NetworkManager.service.d
 %{_mandir}/man7/nm-openvswitch.7*
 %endif
 
@@ -743,6 +733,3 @@ fi
 %{_bindir}/nmtui-hostname
 %{_mandir}/man1/nmtui*
 %endif
-
-%changelog
-__CHANGELOG__
