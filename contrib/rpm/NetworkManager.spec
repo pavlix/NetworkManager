@@ -121,34 +121,34 @@ Conflicts: NetworkManager-pptp < 1:0.7.0.99-1
 Conflicts: NetworkManager-openconnect < 0:0.7.0.99-1
 Conflicts: kde-plasma-networkmanagement < 1:0.9-0.49.20110527git.nm09
 
-BuildRequires: dbus-devel >= %{dbus_version}
-BuildRequires: dbus-glib-devel >= %{dbus_glib_version}
+BuildRequires: pkgconfig(dbus-1) >= %{dbus_version}
+BuildRequires: pkgconfig(dbus-glib-1) >= %{dbus_glib_version}
 %if 0%{?fedora}
 BuildRequires: wireless-tools-devel >= %{wireless_tools_version}
 %endif
-BuildRequires: glib2-devel >= 2.32.0
-BuildRequires: gobject-introspection-devel >= 0.10.3
+BuildRequires: pkgconfig(gobject-2.0) >= 2.32.0
+BuildRequires: pkgconfig(gobject-introspection-1.0) >= 0.10.3
 BuildRequires: gettext-devel
 BuildRequires: pkgconfig
-BuildRequires: libnl3-devel >= %{libnl3_version}
+BuildRequires: pkgconfig(libnl-3.0) >= %{libnl3_version}
 BuildRequires: automake autoconf intltool libtool
 %if %{with ppp}
 BuildRequires: ppp-devel >= 2.4.5
 %endif
-BuildRequires: nss-devel >= 3.11.7
+BuildRequires: pkgconfig(nss) >= 3.11.7
 BuildRequires: dhclient
 BuildRequires: readline-devel
 BuildRequires: audit-libs-devel
 %if %{with regen_docs}
 BuildRequires: gtk-doc
 %endif
-BuildRequires: libudev-devel
-BuildRequires: libuuid-devel
+BuildRequires: pkgconfig(libudev)
+BuildRequires: pkgconfig(uuid)
 BuildRequires: vala-tools
 BuildRequires: iptables
 BuildRequires: libxslt
 %if %{with bluetooth}
-BuildRequires: bluez-libs-devel
+BuildRequires: pkgconfig(bluez)
 %endif
 BuildRequires: systemd >= 200-3 systemd-devel
 %if 0%{?fedora}
@@ -165,9 +165,9 @@ BuildRequires: newt-devel
 BuildRequires: /usr/bin/dbus-launch
 BuildRequires: pygobject3-base
 BuildRequires: dbus-python
-BuildRequires: libselinux-devel
-BuildRequires: polkit-devel
-BuildRequires: jansson-devel
+BuildRequires: pkgconfig(libselinux)
+BuildRequires: pkgconfig(polkit-gobject-1)
+BuildRequires: pkgconfig(jansson)
 
 
 %description
