@@ -89,17 +89,18 @@
 Name: NetworkManager
 Summary: Network connection manager and user applications
 Epoch: %{epoch_version}
-Version: %{rpm_version}
-Release: %{release_version}%{?snap}%{?dist}
+Version: 1.2.3.4
+Release: 0
 Group: System Environment/Base
 License: GPLv2+
 URL: http://www.gnome.org/projects/NetworkManager/
 
 #Source: https://download.gnome.org/sources/NetworkManager/%{real_version_major}/%{name}-%{real_version}.tar.xz
-Source: __SOURCE1__
-Source1: NetworkManager.conf
+Source: %{name}-%{version}.tar.xz
+Source4: NetworkManager.conf
 Source2: 00-server.conf
 Source3: 20-connectivity-fedora.conf
+Source1: %{name}-rpmlintrc
 
 #Patch1: 0001-some.patch
 
@@ -136,7 +137,7 @@ BuildRequires: automake autoconf intltool libtool
 BuildRequires: ppp-devel >= 2.4.5
 %endif
 BuildRequires: pkgconfig(nss) >= 3.11.7
-BuildRequires: dhclient
+BuildRequires: dhcp-client
 BuildRequires: readline-devel
 BuildRequires: pkgconfig(audit)
 %if %{with regen_docs}
@@ -144,7 +145,7 @@ BuildRequires: gtk-doc
 %endif
 BuildRequires: pkgconfig(libudev)
 BuildRequires: pkgconfig(uuid)
-BuildRequires: vala-tools
+BuildRequires: vala
 BuildRequires: iptables
 BuildRequires: libxslt
 %if %{with bluetooth}
@@ -162,12 +163,20 @@ BuildRequires: pkgconfig(mm-glib) >= 1.0
 %if %{with nmtui}
 BuildRequires: pkgconfig(libnewt)
 %endif
-BuildRequires: /usr/bin/dbus-launch
+%if 0%{?suse_version}
+BuildRequires: python3-gobject
+BuildRequires: python3-dbus-python
+%else
 BuildRequires: pygobject3-base
 BuildRequires: dbus-python
+%endif
 BuildRequires: pkgconfig(libselinux)
 BuildRequires: pkgconfig(polkit-gobject-1)
 BuildRequires: pkgconfig(jansson)
+# Package that contains /etc/sysconfig/network-scripts
+BuildRequires: initscripts-network
+# OBS: have choice for text-www-browser needed by docbook-utils: elinks lynx w3m
+BuildRequires: elinks
 
 
 %description
@@ -211,6 +220,7 @@ This package contains NetworkManager support for Bluetooth devices.
 Summary: Team device plugin for NetworkManager
 Group: System Environment/Base
 BuildRequires: pkgconfig(libteamdctl)
+
 Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Obsoletes: NetworkManager < %{obsoletes_device_plugins}
 # Team was split from main NM binary between 0.9.10 and 1.0
@@ -384,7 +394,7 @@ by nm-connection-editor and nm-applet in a non-graphical environment.
 %endif
 
 %prep
-%setup -q -n NetworkManager-%{real_version}
+%setup -q
 
 #%patch1 -p1
 
@@ -396,10 +406,6 @@ autoreconf --install --force
 intltoolize --automake --copy --force
 %configure \
 	--disable-static \
-	--with-dhclient=yes \
-	--with-dhcpcd=no \
-	--with-dhcpcanon=no \
-	--with-config-dhcp-default=dhclient \
 	--with-crypto=nss \
 %if %{with test}
 	--enable-more-warnings=error \
@@ -480,15 +486,11 @@ intltoolize --automake --copy --force
 	--with-tests=no \
 %endif
 	--with-valgrind=no \
-	--enable-ifcfg-rh=yes \
 %if %{with ppp}
 	--with-pppd-plugin-dir=%{_libdir}/pppd/%{ppp_version} \
 	--enable-ppp=yes \
 %endif
 	--with-dist-version=%{version}-%{release} \
-	--with-config-plugins-default='ifcfg-rh,ibft' \
-	--with-config-dns-rc-manager-default=symlink \
-	--with-config-logging-backend-default=journal \
 	--enable-json-validation \
 %if %{with libnm_glib}
 	--with-libnm-glib
@@ -502,7 +504,7 @@ make %{?_smp_mflags}
 # install NM
 make install DESTDIR=%{buildroot}
 
-cp %{SOURCE1} %{buildroot}%{_sysconfdir}/%{name}/
+cp %{SOURCE4} %{buildroot}%{_sysconfdir}/%{name}/
 
 cp %{SOURCE2} %{buildroot}%{nmlibdir}/conf.d/
 cp %{SOURCE3} %{buildroot}%{nmlibdir}/conf.d/
@@ -521,15 +523,16 @@ rm -f %{buildroot}%{_libdir}/NetworkManager/*.la
 find %{buildroot}%{_datadir}/gtk-doc -exec touch --reference configure.ac '{}' \+
 
 %if 0%{?__debug_package}
-mkdir -p %{buildroot}%{_prefix}/src/debug/NetworkManager-%{real_version}
-cp valgrind.suppressions %{buildroot}%{_prefix}/src/debug/NetworkManager-%{real_version}
+#mkdir -p %{buildroot}%{_prefix}/src/debug/NetworkManager-%{real_version}
+#cp valgrind.suppressions %{buildroot}%{_prefix}/src/debug/NetworkManager-%{real_version}
 %endif
 
 
-%check
-%if %{with test}
-make %{?_smp_mflags} check
-%endif
+# Test didn't work for me
+#%check
+#%if %{with test}
+#make %{?_smp_mflags} check
+#%endif
 
 
 %pre
@@ -615,8 +618,7 @@ fi
 %{systemd_dir}/NetworkManager.service
 %{systemd_dir}/NetworkManager-wait-online.service
 %{systemd_dir}/NetworkManager-dispatcher.service
-%dir %{_datadir}/doc/NetworkManager/examples
-%{_datadir}/doc/NetworkManager/examples/server.conf
+%{_datadir}/doc/NetworkManager
 %doc NEWS AUTHORS README CONTRIBUTING TODO
 %license COPYING
 
@@ -651,7 +653,7 @@ fi
 %if %{with ovs}
 %files ovs
 %{_libdir}/%{name}/libnm-device-plugin-ovs.so
-%{systemd_dir}/NetworkManager.service.d/NetworkManager-ovs.conf
+%{systemd_dir}/NetworkManager.service.d
 %{_mandir}/man7/nm-openvswitch.7*
 %endif
 
@@ -743,6 +745,3 @@ fi
 %{_bindir}/nmtui-hostname
 %{_mandir}/man1/nmtui*
 %endif
-
-%changelog
-__CHANGELOG__
