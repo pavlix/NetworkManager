@@ -108,8 +108,6 @@ Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
 
-Requires: dbus >= %{dbus_version}
-Requires: glib2 >= %{glib2_version}
 Requires: %{name}-libnm%{?_isa} = %{epoch}:%{version}-%{release}
 Obsoletes: dhcdbd
 Obsoletes: NetworkManager < %{obsoletes_device_plugins}
@@ -206,7 +204,6 @@ Summary: Bluetooth device plugin for NetworkManager
 Group: System Environment/Base
 Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Requires: NetworkManager-wwan = %{epoch}:%{version}-%{release}
-Requires: bluez >= 4.101-5
 Obsoletes: NetworkManager < %{obsoletes_device_plugins}
 Obsoletes: NetworkManager-bt
 
@@ -236,7 +233,6 @@ This package contains NetworkManager support for team devices.
 Summary: Wifi plugin for NetworkManager
 Group: System Environment/Base
 Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
-Requires: wpa_supplicant >= 1:1.1
 # the wifi plugin doesn't require iwd, even if it was build with
 # iwd support. Note that the plugin supports both supplicant and
 # iwd backend, that doesn't mean that the user requires to have them
@@ -254,7 +250,6 @@ This package contains NetworkManager support for Wifi and OLPC devices.
 Summary: Mobile broadband device plugin for NetworkManager
 Group: System Environment/Base
 Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
-Requires: ModemManager
 Obsoletes: NetworkManager < %{obsoletes_device_plugins}
 
 %description wwan
@@ -268,7 +263,6 @@ devices.
 Summary: OpenVSwitch device plugin for NetworkManager
 Group: System Environment/Base
 Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
-Requires: openvswitch
 
 %description ovs
 This package contains NetworkManager support for OpenVSwitch bridges.
@@ -280,7 +274,6 @@ This package contains NetworkManager support for OpenVSwitch bridges.
 Summary: PPP plugin for NetworkManager
 Group: System Environment/Base
 Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
-Requires: ppp = %{ppp_version}
 Requires: NetworkManager = %{epoch}:%{version}-%{release}
 Obsoletes: NetworkManager < %{obsoletes_ppp_plugin}
 
@@ -292,8 +285,6 @@ This package contains NetworkManager support for PPP.
 %package glib
 Summary: Libraries for adding NetworkManager support to applications (old API).
 Group: Development/Libraries
-Requires: dbus >= %{dbus_version}
-Requires: dbus-glib >= %{dbus_glib_version}
 Conflicts: NetworkManager-libnm < %{epoch}:%{version}-%{release}
 
 %description glib
@@ -306,7 +297,6 @@ the older NetworkManager API. See also NetworkManager-libnm.
 Summary: Header files for adding NetworkManager support to applications (old API).
 Group: Development/Libraries
 Requires: %{name}-glib%{?_isa} = %{epoch}:%{version}-%{release}
-Requires: glib2-devel
 Requires: pkgconfig
 Requires: pkgconfig(dbus-glib-1) >= %{dbus_glib_version}
 Provides: %{name}-devel = %{epoch}:%{version}-%{release}
