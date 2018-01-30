@@ -314,6 +314,9 @@ This is the older NetworkManager API.  See also NetworkManager-libnm-devel.
 Summary: Libraries for adding NetworkManager support to applications (new API).
 Group: Development/Libraries
 Conflicts: NetworkManager-glib < %{epoch}:%{version}-%{release}
+%if 0%{suse_version}
+Provides: libnm0
+%endif
 
 %description libnm
 This package contains the libraries that make it easier to use some
